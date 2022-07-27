@@ -1,0 +1,36 @@
+{
+  "name": "captchabot",
+  "version": "1.0.0",
+  "description": "Creates captcha as images, sends them to new users.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "prettier --write \"**/*.js\"",
+    "build": "npm run lint && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewDisco/captchabot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "captcha",
+    "discord",
+    "bot"
+  ],
+  "author": "Andrew.#1337",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndrewDisco/captchabot/issues"
+  },
+  "homepage": "https://github.com/AndrewDisco/captchabot#readme",
+  "dependencies": {
+    "@haileybot/captcha-generator": "^1.7.0",
+    "discord.js": "^13.8.0"
+  },
+  "devDependencies": {
+    "prettier": "2.7.1"
+  }
+}
