@@ -17,7 +17,8 @@ module.exports = {
       .setTitle("Captcha Verification")
       .setDescription(`Please send the captcha code here.
  
-      Hello! You are required to complete a captcha before entering the server.
+      Hello! You are required to complete 
+      a captcha before entering the server.
       **NOTE:** **This is Case Sensitive.**
                                   
       **Why?**
@@ -29,50 +30,50 @@ module.exports = {
       .setFooter(`NOTE: You have 30 Seconds to Answer | ${tries}/3 Tries`)
       .setImage('attachment://captcha.jpeg');
 
-    let msg = member.send({
-      embeds: [verifyEmbed],
-      files: [
-        new Discord.MessageAttachment(captcha.JPEGStream, "captcha.jpeg"),
-      ],
-    });
+    
+      try {
+          member.send({ embeds: [verifyEmbed], files: [
+            new Discord.MessageAttachment(captcha.JPEGStream, "captcha.jpeg"),
+          ] }).then(msg => {
+          console.log(`Captcha sent to ${member.user.tag} with answer ${captcha.value}`);
 
-    console.log(`Captcha sent to ${member.user.tag} with answer ${captcha.value}`);
-
-    (async () => {
-      //We wait for the user to send the captcha
-      let filter = (m) => m.author.id === member.id;
-
-      let collector = await msg.channel.awaitMessages(filter, {
-        max: 1,
-        time: 30000,
-        errors: ["time"],
-      });
-
-      //We get the user's answer
-      collector.on("collect", response => {
-        //Check if the user has enough tries
-        if (tries > 0) {
-          //Check if the user's response is correct
-          if(response === captcha.value) {
-            console.log("User " + member.user.tag + " has passed the captcha!");
-            member.send("You have passed the captcha!");
-            //If the user passes the captcha, you can add the user to a role
-          }
-          else {
-            console.log("User " + member.user.tag + " has failed the captcha!");
-            member.send("You have failed the captcha!");
-            //If the user fails the captcha, you can remove the user from the server
-            //member.kick("Failed captcha");
-          }
-        }
-        else {
-          console.log("User " + member.user.tag + " has failed the captcha!");
-          member.send("You have failed the captcha!");
-          //If the user fails the captcha, you can remove the user from the server
-          //member.kick("Failed captcha");
-        }
-      });
-    } 
-    )();
+          //We wait for the user to send the captcha
+          let filter = (m) => m.author.id === member.id;
+          let collector = msg.channel.createMessageCollector({
+            max: 1,
+            time: 30000,
+            errors: ["time"],
+          });
+          console.log(msg.channel);
+        
+          //We get the user's answer
+          collector.on("collect", response => {
+            console.log(`${member.user.tag} has answered ${response.content}`);
+            //Check if the user has enough tries
+            if (tries > 0) {
+              //Check if the user's response is correct
+              if(response === captcha.value) {
+                console.log("User " + member.user.tag + " has passed the captcha!");
+                member.send("You have passed the captcha!");
+                //If the user passes the captcha, you can add the user to a role
+              }
+              else {
+                console.log("User " + member.user.tag + " has failed the captcha!");
+                member.send("You have failed the captcha!");
+                //If the user fails the captcha, you can remove the user from the server
+                //member.kick("Failed captcha");
+              }
+            }
+            else {
+              console.log("User " + member.user.tag + " has failed the captcha!");
+              member.send("You have failed the captcha!");
+              //If the user fails the captcha, you can remove the user from the server
+              //member.kick("Failed captcha");
+            }
+          });
+        })
+      } catch (err) {
+        return console.log(err);
+      }
   },
 };
