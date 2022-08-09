@@ -1,4 +1,6 @@
 {
     "prefix": "!",
-    "token": ""
+    "token": "",
+    "addRoleOnComplete": false,
+    "completeRoleId": "id here"
 }

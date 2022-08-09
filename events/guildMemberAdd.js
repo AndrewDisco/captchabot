@@ -1,6 +1,7 @@
 const Captcha = require("@haileybot/captcha-generator");
 const Discord = require("discord.js");
-var loadingSpinner = require('loading-spinner');
+var loadingSpinner = require("loading-spinner");
+const { addRoleOnComplete, completeRoleId } = require("../config.json");
 
 module.exports = {
   name: "guildMemberAdd",
@@ -16,7 +17,8 @@ module.exports = {
 
     const verifyEmbed = new Discord.MessageEmbed()
       .setTitle("Captcha Verification")
-      .setDescription(`Please send the captcha code here.
+      .setDescription(
+        `Please send the captcha code here.
  
       Hello! You are required to complete 
       a captcha before entering the server.
@@ -26,57 +28,167 @@ module.exports = {
       This is to protect the server against
       targeted attacks using automated user accounts.
                       
-      **Your Captcha:**`)
+      **Your Captcha:**`
+      )
       .setColor("#0099ff")
       .setFooter(`NOTE: You have 30 Seconds to Answer | ${tries}/3 Tries`)
-      .setImage('attachment://captcha.jpeg');
+      .setImage("attachment://captcha.jpeg");
 
-    
-      try {
-          member.send({ embeds: [verifyEmbed], files: [
+    try {
+      member
+        .send({
+          embeds: [verifyEmbed],
+          files: [
             new Discord.MessageAttachment(captcha.JPEGStream, "captcha.jpeg"),
-          ] }).then(msg => {
-          console.log(`\x1b[33mCaptcha sent to ${member.user.tag} with answer ${captcha.value}\x1b[0m`);
+          ],
+        })
+        .then((msg) => {
+          console.log(
+            `\x1b[33mCaptcha sent to ${member.user.tag} with answer ${captcha.value}\x1b[0m`
+          );
           loadingSpinner.start(100, {
             clearChar: true,
           });
 
+          const filter = (m) => m.author.id === member.id;
+
           //We wait for the user to send the captcha
           let collector = msg.channel.createMessageCollector({
-            max: 1,
+            filter,
+            max: 3,
             time: 30000,
             errors: ["time"],
           });
-        
+
           //We get the user's answer
-          collector.on("collect", response => {
+          collector.on("collect", (response) => {
             loadingSpinner.stop();
-            console.log(`\x1b[34m${member.user.tag} has answered ${response.content}\x1b[0m`);
+            console.log(
+              `\x1b[34m${member.user.tag} has answered ${response.content}\x1b[0m`
+            );
             //Check if the user has enough tries
-            if (tries > 0) {
-              //Check if the user's response is correct
-              if(response.content === captcha.value) {
-                console.log("\x1b[32mUser " + member.user.tag + " has passed the captcha!\x1b[0m");
-                member.send("You have passed the captcha!");
-                //If the user passes the captcha, you can add the user to a role
-              }
-              else {
-                console.log("\x1b[31mUser " + member.user.tag + " has failed the captcha!\x1b[0m");
-                member.send("You have failed the captcha!");
-                //If the user fails the captcha, you can remove the user from the server
-                //member.kick("Failed captcha");
-              }
-            }
-            else {
-              console.log("\x1b[31mUser " + member.user.tag + " has failed the captcha!");
-              member.send("You have failed the captcha!");
-              //If the user fails the captcha, you can remove the user from the server
-              //member.kick("Failed captcha");
+            switch (tries) {
+              case 3:
+                if (
+                  response.content === captcha.value
+                ) {
+                  console.log(
+                    "\x1b[32mUser " +
+                      member.user.tag +
+                      " has passed the captcha!\x1b[0m"
+                  );
+                  //If the user has enough tries, we send a message to the user
+                  member.send(
+                    `You have successfully completed the captcha!
+                    You can now enter the server.`
+                  );
+                  //EDIT THIS IN CONFIG.JSON
+                  if(addRoleOnComplete) {
+                    member.roles.add(completeRoleId);
+                  }
+                } else {
+                  console.log(
+                    "\x1b[31mUser " +
+                      member.user.tag +
+                      " has failed the captcha!\x1b[0m"
+                  );
+                  tries--;
+                  //If the user has not enough tries, we send a message to the user
+                  member.send(
+                    `You have failed the captcha!
+                    You have ${tries} tries left.`
+                  );
+                }
+                break;
+              case 2:
+                if (
+                  response.content === captcha.value
+                ) {
+                  console.log(
+                    "\x1b[32mUser " +
+                      member.user.tag +
+                      " has passed the captcha!\x1b[0m"
+                  );
+                  //If the user has enough tries, we send a message to the user
+                  member.send(
+                    `You have successfully completed the captcha!
+                    You can now enter the server.`
+                  );
+                  //EDIT THIS IN CONFIG.JSON
+                  if(addRoleOnComplete) {
+                    member.roles.add(completeRoleId);
+                  }
+                } else {
+                  console.log(
+                    "\x1b[31mUser " +
+                      member.user.tag +
+                      " has failed the captcha!\x1b[0m"
+                  );
+                  tries--;
+                  //If the user has not enough tries, we send a message to the user
+                  member.send(
+                    `You have failed the captcha!
+                    You have ${tries} tries left.`
+                  );
+                }
+                break;
+              case 1:
+                if (
+                  response.content === captcha.value
+                ) {
+                  console.log(
+                    "\x1b[32mUser " +
+                      member.user.tag +
+                      " has passed the captcha!\x1b[0m"
+                  );
+                  //If the user has enough tries, we send a message to the user
+                  member.send(
+                    `You have successfully completed the captcha!
+                    You can now enter the server.`
+                  );
+                  //EDIT THIS IN CONFIG.JSON
+                  if(addRoleOnComplete) {
+                    member.roles.add(completeRoleId);
+                  }
+                } else {
+                  console.log(
+                    "\x1b[31mUser " +
+                      member.user.tag +
+                      " has failed the captcha!\x1b[0m"
+                  );
+                  tries--;
+                }
+                break;
+              case 0:
+                collector.stop();
             }
           });
-        })
-      } catch (err) {
-        return console.log(err);
-      }
+
+          collector.on("end", (collected, reason) => {
+              console.log(
+                "\x1b[31mUser " +
+                  member.user.tag +
+                  " has failed the captcha!\x1b[0m"
+              );
+              //If the user has not enough tries, we send a message to the user
+              if(reason === "time"){
+              member.send(
+                `You have failed the captcha!
+                You have exceeded the time limit.`
+              );
+              }
+              else{
+                member.send(
+                  `You have failed the captcha!
+                  You have no more tries left.`
+                );
+              }
+              //We delete the captcha message
+              msg.delete();
+          });
+        });
+    } catch (err) {
+      return console.log(err);
+    }
   },
 };
