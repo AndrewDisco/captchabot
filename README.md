@@ -23,4 +23,8 @@ You're first gonna want to follow this checklist:
  - [x] Bake a cake
 
 ## 📝 Using and modifying this
-Work in progress - please bare with me :)
+Server admins who want to stop spam and bots from invading their community may find it handy to use a Discord bot that sends captchas. To better meet their needs, some users might want to modify the bot. Fortunately, this specific bot is open source, which allows users to freely use, alter, and share it.
+
+Simply download the code and instal it on your server to begin utilising the bot. As soon as it's up and running, users will be required to finish a captcha before they can publish messages in particular channels or carry out specific tasks. By doing this, you can stop your community from being overrun by spam and bots.
+
+Modifying the code will allow you to alter the bot as needed. For instance, you might wish to modify the captcha type or give the bot new capabilities. The options are unlimited, and because the bot is open source, you may modify it to meet your needs.
