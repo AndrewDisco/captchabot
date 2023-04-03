@@ -1,13 +1,25 @@
 const Captcha = require("@haileybot/captcha-generator");
 const Discord = require("discord.js");
 var loadingSpinner = require("loading-spinner");
-const { addRoleOnComplete, completeRoleId } = require("../config.json");
+const {
+  guildId,
+  prefix,
+  addRoleOnComplete,
+  completeRoleId,
+} = require("../config.json");
 
 module.exports = {
   name: "guildMemberAdd",
   execute(member, bot) {
-    //Log the newly joined member to console (optional)
-    console.log("User " + member.user.tag + " has joined the server!");
+    console.log(member);
+    //get the guild by its id
+    let guild = bot.guilds.cache.get(guildId);
+
+    //get the GuildMember object from the guild
+    let guildMember = guild.members.cache.get(member.id);
+    console.log("---------------------");
+
+    console.log(guildMember);
 
     //We create a captcha for the new member
     let captcha = new Captcha();
@@ -33,6 +45,8 @@ module.exports = {
       .setColor("#0099ff")
       .setFooter(`NOTE: You have 30 Seconds to Answer | ${tries}/3 Tries`)
       .setImage("attachment://captcha.jpeg");
+
+    let captchaPassed = false;
 
     try {
       member
@@ -69,9 +83,7 @@ module.exports = {
             //Check if the user has enough tries
             switch (tries) {
               case 3:
-                if (
-                  response.content === captcha.value
-                ) {
+                if (response.content === captcha.value) {
                   console.log(
                     "\x1b[32mUser " +
                       member.user.tag +
@@ -83,9 +95,12 @@ module.exports = {
                     You can now enter the server.`
                   );
                   //EDIT THIS IN CONFIG.JSON
-                  if(addRoleOnComplete) {
+                  if (addRoleOnComplete) {
                     member.roles.add(completeRoleId);
                   }
+
+                  captchaPassed = true;
+                  collector.stop();
                 } else {
                   console.log(
                     "\x1b[31mUser " +
@@ -101,9 +116,7 @@ module.exports = {
                 }
                 break;
               case 2:
-                if (
-                  response.content === captcha.value
-                ) {
+                if (response.content === captcha.value) {
                   console.log(
                     "\x1b[32mUser " +
                       member.user.tag +
@@ -115,9 +128,12 @@ module.exports = {
                     You can now enter the server.`
                   );
                   //EDIT THIS IN CONFIG.JSON
-                  if(addRoleOnComplete) {
+                  if (addRoleOnComplete) {
                     member.roles.add(completeRoleId);
                   }
+
+                  captchaPassed = true;
+                  collector.stop();
                 } else {
                   console.log(
                     "\x1b[31mUser " +
@@ -133,9 +149,7 @@ module.exports = {
                 }
                 break;
               case 1:
-                if (
-                  response.content === captcha.value
-                ) {
+                if (response.content === captcha.value) {
                   console.log(
                     "\x1b[32mUser " +
                       member.user.tag +
@@ -147,9 +161,12 @@ module.exports = {
                     You can now enter the server.`
                   );
                   //EDIT THIS IN CONFIG.JSON
-                  if(addRoleOnComplete) {
+                  if (addRoleOnComplete) {
                     member.roles.add(completeRoleId);
                   }
+
+                  captchaPassed = true;
+                  collector.stop();
                 } else {
                   console.log(
                     "\x1b[31mUser " +
@@ -165,26 +182,31 @@ module.exports = {
           });
 
           collector.on("end", (collected, reason) => {
+            loadingSpinner.stop();
+
+            if (!captchaPassed) {
               console.log(
                 "\x1b[31mUser " +
-                  member.user.tag +
+                  member.username +
                   " has failed the captcha!\x1b[0m"
               );
               //If the user has not enough tries, we send a message to the user
-              if(reason === "time"){
-              member.send(
-                `You have failed the captcha!
-                You have exceeded the time limit.`
-              );
-              }
-              else{
+              if (reason === "time") {
                 member.send(
-                  `You have failed the captcha!
-                  You have no more tries left.`
+                  "You have failed the captcha!\nYou have exceeded the time limit.\n**You can try again in 30 seconds by typing ``" +
+                    prefix +
+                    "retry``.**"
+                );
+              } else {
+                member.send(
+                  "You have failed the captcha!\nYou have no more tries left.\n**You can try again in 30 seconds by typing ``" +
+                    prefix +
+                    "retry``.**"
                 );
               }
               //We delete the captcha message
               msg.delete();
+            }
           });
         });
     } catch (err) {
