@@ -1,6 +1,8 @@
 const Captcha = require("@haileybot/captcha-generator");
 const Discord = require("discord.js");
 var loadingSpinner = require("loading-spinner");
+const { addRoleOnComplete, completeRoleId } = require("../config.json");
+
 const {
   guildId,
   prefix,
